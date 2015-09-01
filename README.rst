@@ -37,7 +37,7 @@ JSON libraries
 --------------
 
 You can use **ujson** or **simplejson** instead of built-in **json** library.
-They are faster and can serialize `Decimal` values.
+They are faster and can serialize ``Decimal`` values.
 
 .. code-block:: python
 
@@ -77,6 +77,36 @@ Let's try to log something.
     logger = logging.getLogger('my_json')
 
     logger.info('Sign up', extra={'referral_code': '52d6ce'})
+
+Custom formatter
+----------------
+
+You will likely need a custom log format. For instance, you want to log
+a user ID, an IP address and ``time`` as ``django.utils.timezone.now()``.
+To do so you should override ``JSONFormatter.json_record()``.
+
+.. code-block:: python
+
+    class CustomisedJSONFormatter(json_log_formatter.JSONFormatter):
+        def json_record(self, message, extra, record):
+            extra['message'] = message
+            extra['user_id'] = current_user_id()
+            extra['ip'] = current_ip()
+            if 'time' not in extra:
+                extra['time'] = django.utils.timezone.now()
+            return extra
+
+Let's say you want ``datetime`` to be serialized as timestamp.
+Then you should use **ujson** (which does it by default) and disable
+ISO8601 date mutation.
+
+.. code-block:: python
+
+    class CustomisedJSONFormatter(json_log_formatter.JSONFormatter):
+        json_lib = ujson
+
+        def mutate_json_record(self, json_record):
+            pass
 
 Tests
 -----
