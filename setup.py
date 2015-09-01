@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='JSON-log-formatter',
-    version='0.0.1',
+    version='0.0.2',
     packages=['json_log_formatter'],
     author='Marsel Mavletkulov',
     author_email='marselester@ya.ru',
