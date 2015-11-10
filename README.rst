@@ -23,6 +23,7 @@ Usage example:
 
     logger = logging.getLogger('my_json')
     logger.addHandler(json_handler)
+    logger.setLevel(logging.INFO)
 
     logger.info('Sign up', extra={'referral_code': '52d6ce'})
 
