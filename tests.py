@@ -66,7 +66,6 @@ class JSONFormatterTest(TestCase):
 
 
 class MutatingFormatter(JSONFormatter):
-
     def mutate_json_record(self, json_record):
         new_record = {}
         for k, v in json_record.items():
