@@ -61,8 +61,13 @@ class JSONFormatter(logging.Formatter):
         message = record.getMessage()
         extra = self.extra_from_record(record)
         json_record = self.json_record(message, extra, record)
-        self.mutate_json_record(json_record)
-        return self.json_lib.dumps(json_record)
+        mutated_record = self.mutate_json_record(json_record)
+        # Backwards compatibility: Functions that overwrite this but don't
+        # return a new value will return None because they modified the
+        # argument passed in.
+        if mutated_record is None:
+            mutated_record = json_record
+        return self.json_lib.dumps(mutated_record)
 
     def extra_from_record(self, record):
         """Returns `extra` dict you passed to logger.
@@ -104,3 +109,4 @@ class JSONFormatter(logging.Formatter):
             attr = json_record[attr_name]
             if isinstance(attr, datetime):
                 json_record[attr_name] = attr.isoformat()
+        return json_record
