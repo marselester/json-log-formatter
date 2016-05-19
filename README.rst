@@ -110,7 +110,7 @@ ISO8601 date mutation.
         json_lib = ujson
 
         def mutate_json_record(self, json_record):
-            pass
+            return json_record
 
 Tests
 -----

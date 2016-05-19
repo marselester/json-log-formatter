@@ -65,6 +65,27 @@ class JSONFormatterTest(TestCase):
         self.assertEqual(set(json_record), expected_fields)
 
 
+class MutatingFormatter(JSONFormatter):
+
+    def mutate_json_record(self, json_record):
+        new_record = {}
+        for k, v in json_record.items():
+            if isinstance(v, datetime):
+                v = v.isoformat()
+            new_record[k] = v
+        return new_record
+
+
+class MutatingFormatterTest(TestCase):
+    def setUp(self):
+        json_handler.setFormatter(MutatingFormatter())
+
+    def test_new_record_accepted(self):
+        logger.info('Sign up', extra={'fizz': DATETIME})
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['fizz'], DATETIME_ISO)
+
+
 class JsonLibTest(TestCase):
     def setUp(self):
         json_handler.setFormatter(JSONFormatter())
