@@ -67,7 +67,14 @@ class JSONFormatter(logging.Formatter):
         # argument passed in.
         if mutated_record is None:
             mutated_record = json_record
-        return self.json_lib.dumps(mutated_record)
+        return self.to_json(mutated_record)
+
+    def to_json(self, record):
+        """Convert record dict to a json string
+
+        Override this method to change the way dict is converted to JSON.
+        """
+        return self.json_lib.dumps(record)
 
     def extra_from_record(self, record):
         """Returns `extra` dict you passed to logger.
