@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import logging
+import traceback
 from datetime import datetime
 
 import json
@@ -97,6 +99,10 @@ class JSONFormatter(logging.Formatter):
         extra['message'] = message
         if 'time' not in extra:
             extra['time'] = datetime.utcnow()
+        if record.exc_info:
+            extra["exception_message"] = record.exc_info[1].message
+            extra["exception_args"] = record.exc_info[1].args
+            extra["traceback"] = traceback.format_exception(*record.exc_info)
         return extra
 
     def mutate_json_record(self, json_record):
