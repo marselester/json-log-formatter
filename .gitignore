@@ -1,5 +1,8 @@
 *.pyc
 .DS_Store
+__pycache__
 /MANIFEST
 /dist
 /.tox
+/.cache
+/JSON_log_formatter.egg-info
