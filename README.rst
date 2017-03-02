@@ -27,6 +27,11 @@ Usage example:
 
     logger.info('Sign up', extra={'referral_code': '52d6ce'})
 
+    try:
+        raise ValueError('something wrong')
+    except ValueError:
+        logger.error('Request failed', exc_info=True)
+
 The log file will contain the following log record (inline).
 
 .. code-block:: json
@@ -35,6 +40,11 @@ The log file will contain the following log record (inline).
         "message": "Sign up",
         "time": "2015-09-01T06:06:26.524448",
         "referral_code": "52d6ce"
+    }
+    {
+        "message": "Request failed",
+        "time": "2015-09-01T06:06:26.524449",
+        "exc_info": "Traceback (most recent call last): ..."
     }
 
 JSON libraries

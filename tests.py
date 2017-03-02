@@ -64,6 +64,17 @@ class JSONFormatterTest(TestCase):
         ])
         self.assertEqual(set(json_record), expected_fields)
 
+    def test_exc_info_is_logged(self):
+        try:
+            raise ValueError('something wrong')
+        except ValueError:
+            logger.error('Request failed', exc_info=True)
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertIn(
+            'Traceback (most recent call last)',
+            json_record['exc_info']
+        )
+
 
 class MutatingFormatter(JSONFormatter):
     def mutate_json_record(self, json_record):

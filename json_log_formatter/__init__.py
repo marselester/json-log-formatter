@@ -55,6 +55,7 @@ class JSONFormatter(logging.Formatter):
         }
 
     """
+
     json_lib = json
 
     def format(self, record):
@@ -70,9 +71,10 @@ class JSONFormatter(logging.Formatter):
         return self.to_json(mutated_record)
 
     def to_json(self, record):
-        """Convert record dict to a json string
+        """Converts record dict to a JSON string.
 
         Override this method to change the way dict is converted to JSON.
+
         """
         return self.json_lib.dumps(record)
 
@@ -104,6 +106,10 @@ class JSONFormatter(logging.Formatter):
         extra['message'] = message
         if 'time' not in extra:
             extra['time'] = datetime.utcnow()
+
+        if record.exc_info:
+            extra['exc_info'] = self.formatException(record.exc_info)
+
         return extra
 
     def mutate_json_record(self, json_record):
