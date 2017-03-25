@@ -110,6 +110,8 @@ class JSONFormatter(logging.Formatter):
         if record.exc_info:
             extra['exc_info'] = self.formatException(record.exc_info)
 
+        extra['logLevel'] = record.levelname
+
         return extra
 
     def mutate_json_record(self, json_record):
