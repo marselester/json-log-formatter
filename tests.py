@@ -45,22 +45,24 @@ class JSONFormatterTest(TestCase):
         logger.info('Sign up', extra={'fizz': 'bazz'})
         self.assertNotIn(DATETIME_ISO, log_buffer.getvalue())
 
-    def test_message_and_time_are_in_json_record_when_extra_is_blank(self):
+    def test_message_and_time_and_logLevel_are_in_json_record_when_extra_is_blank(self):
         logger.info('Sign up')
         json_record = json.loads(log_buffer.getvalue())
         expected_fields = set([
             'message',
             'time',
+            'logLevel',
         ])
         self.assertEqual(set(json_record), expected_fields)
 
-    def test_message_and_time_and_extra_are_in_json_record_when_extra_is_provided(self):
+    def test_message_and_time_and_logLevel_and_extra_are_in_json_record_when_extra_is_provided(self):
         logger.info('Sign up', extra={'fizz': 'bazz'})
         json_record = json.loads(log_buffer.getvalue())
         expected_fields = set([
             'message',
             'time',
             'fizz',
+            'logLevel',
         ])
         self.assertEqual(set(json_record), expected_fields)
 
