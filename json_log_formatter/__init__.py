@@ -122,4 +122,7 @@ class JSONFormatter(logging.Formatter):
             attr = json_record[attr_name]
             if isinstance(attr, datetime):
                 json_record[attr_name] = attr.isoformat()
+            # django.core.handlers.wsgi.WSGIRequest
+            elif attr.__class__.__name__ == "WSGIRequest":
+                json_record[attr_name] = "{} {}".format(attr.method, attr.path)
         return json_record
