@@ -1,9 +1,13 @@
-import unittest
-import logging
 from datetime import datetime
 from decimal import Decimal
-
+from io import BytesIO
+import unittest
+import logging
 import json
+
+
+from django.core.handlers.wsgi import WSGIRequest
+from django.conf import settings
 import ujson
 import simplejson
 
@@ -24,6 +28,8 @@ logging.propagate = False
 
 DATETIME = datetime(2015, 9, 1, 6, 9, 42, 797203)
 DATETIME_ISO = u'2015-09-01T06:09:42.797203'
+
+settings.configure(DEBUG=True)
 
 
 class TestCase(unittest.TestCase):
@@ -100,11 +106,49 @@ class JsonLibTest(TestCase):
     def setUp(self):
         json_handler.setFormatter(JSONFormatter())
 
-    def test_error_when_decimal_is_passed(self):
-        with self.assertRaises(TypeError):
-            logger.log(lvl=0, msg='Payment was sent', extra={
-                'amount': Decimal('0.00497265')
-            })
+    def test_builtin_types_are_serialized(self):
+        logger.log(level=logging.ERROR, msg='Payment was sent', extra={
+            'first_name': 'bob',
+            'amount': 0.00497265,
+            'context': {
+                'tags': ['fizz', 'bazz'],
+            },
+            'things': ('a', 'b'),
+            'ok': True,
+            'none': None,
+        })
+
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['first_name'], 'bob')
+        self.assertEqual(json_record['amount'], 0.00497265)
+        self.assertEqual(json_record['context'], {'tags': ['fizz', 'bazz']})
+        self.assertEqual(json_record['things'], ['a', 'b'])
+        self.assertEqual(json_record['ok'], True)
+        self.assertEqual(json_record['none'], None)
+
+    def test_decimal_is_serialized_as_string(self):
+        logger.log(level=logging.ERROR, msg='Payment was sent', extra={
+            'amount': Decimal('0.00497265')
+        })
+        expected_amount = '"amount": "0.00497265"'
+        self.assertIn(expected_amount, log_buffer.getvalue())
+
+    def test_django_wsgi_request_is_serialized_as_dict(self):
+        request = WSGIRequest({
+            'PATH_INFO': 'bogus',
+            'REQUEST_METHOD': 'bogus',
+            'CONTENT_TYPE': 'text/html; charset=utf8',
+            'wsgi.input': BytesIO(b''),
+        })
+
+        logger.log(level=logging.ERROR, msg='Django response error', extra={
+            'status_code': 500,
+            'request': request
+        })
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['status_code'], 500)
+        self.assertEqual(json_record['request']['path'], '/bogus')
+        self.assertEqual(json_record['request']['method'], 'BOGUS')
 
 
 class UjsonLibTest(TestCase):
@@ -112,6 +156,26 @@ class UjsonLibTest(TestCase):
         formatter = JSONFormatter()
         formatter.json_lib = ujson
         json_handler.setFormatter(formatter)
+
+    def test_builtin_types_are_serialized(self):
+        logger.log(level=logging.ERROR, msg='Payment was sent', extra={
+            'first_name': 'bob',
+            'amount': 0.00497265,
+            'context': {
+                'tags': ['fizz', 'bazz'],
+            },
+            'things': ('a', 'b'),
+            'ok': True,
+            'none': None,
+        })
+
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['first_name'], 'bob')
+        self.assertEqual(json_record['amount'], 0.00497265)
+        self.assertEqual(json_record['context'], {'tags': ['fizz', 'bazz']})
+        self.assertEqual(json_record['things'], ['a', 'b'])
+        self.assertEqual(json_record['ok'], True)
+        self.assertEqual(json_record['none'], None)
 
     def test_decimal_is_serialized_as_number(self):
         logger.info('Payment was sent', extra={
@@ -127,12 +191,48 @@ class UjsonLibTest(TestCase):
         expected_amount = '"amount":0.0'
         self.assertIn(expected_amount, log_buffer.getvalue())
 
+    def test_django_wsgi_request_is_serialized_as_empty_list(self):
+        request = WSGIRequest({
+            'PATH_INFO': 'bogus',
+            'REQUEST_METHOD': 'bogus',
+            'CONTENT_TYPE': 'text/html; charset=utf8',
+            'wsgi.input': BytesIO(b''),
+        })
+
+        logger.log(level=logging.ERROR, msg='Django response error', extra={
+            'status_code': 500,
+            'request': request
+        })
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['status_code'], 500)
+        self.assertEqual(json_record['request'], [])
+
 
 class SimplejsonLibTest(TestCase):
     def setUp(self):
         formatter = JSONFormatter()
         formatter.json_lib = simplejson
         json_handler.setFormatter(formatter)
+
+    def test_builtin_types_are_serialized(self):
+        logger.log(level=logging.ERROR, msg='Payment was sent', extra={
+            'first_name': 'bob',
+            'amount': 0.00497265,
+            'context': {
+                'tags': ['fizz', 'bazz'],
+            },
+            'things': ('a', 'b'),
+            'ok': True,
+            'none': None,
+        })
+
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['first_name'], 'bob')
+        self.assertEqual(json_record['amount'], 0.00497265)
+        self.assertEqual(json_record['context'], {'tags': ['fizz', 'bazz']})
+        self.assertEqual(json_record['things'], ['a', 'b'])
+        self.assertEqual(json_record['ok'], True)
+        self.assertEqual(json_record['none'], None)
 
     def test_decimal_is_serialized_as_number(self):
         logger.info('Payment was sent', extra={
@@ -147,3 +247,20 @@ class SimplejsonLibTest(TestCase):
         })
         expected_amount = '"amount": 0E-8'
         self.assertIn(expected_amount, log_buffer.getvalue())
+
+    def test_django_wsgi_request_is_serialized_as_dict(self):
+        request = WSGIRequest({
+            'PATH_INFO': 'bogus',
+            'REQUEST_METHOD': 'bogus',
+            'CONTENT_TYPE': 'text/html; charset=utf8',
+            'wsgi.input': BytesIO(b''),
+        })
+
+        logger.log(level=logging.ERROR, msg='Django response error', extra={
+            'status_code': 500,
+            'request': request
+        })
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['status_code'], 500)
+        self.assertEqual(json_record['request']['path'], '/bogus')
+        self.assertEqual(json_record['request']['method'], 'BOGUS')

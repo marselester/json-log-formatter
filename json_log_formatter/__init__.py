@@ -73,10 +73,18 @@ class JSONFormatter(logging.Formatter):
     def to_json(self, record):
         """Converts record dict to a JSON string.
 
+        It makes best effort to serialize a record (represents an object as a string)
+        instead of raising TypeError if json library supports default argument.
+        Note, ujson doesn't support it.
+
         Override this method to change the way dict is converted to JSON.
 
         """
-        return self.json_lib.dumps(record)
+        try:
+            return self.json_lib.dumps(record, default=_json_serializable)
+        # ujson doesn't support default argument and raises TypeError.
+        except TypeError:
+            return self.json_lib.dumps(record)
 
     def extra_from_record(self, record):
         """Returns `extra` dict you passed to logger.
@@ -123,3 +131,10 @@ class JSONFormatter(logging.Formatter):
             if isinstance(attr, datetime):
                 json_record[attr_name] = attr.isoformat()
         return json_record
+
+
+def _json_serializable(obj):
+    try:
+        return obj.__dict__
+    except AttributeError:
+        return str(obj)
