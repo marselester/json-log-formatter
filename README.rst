@@ -51,7 +51,6 @@ JSON libraries
 --------------
 
 You can use **ujson** or **simplejson** instead of built-in **json** library.
-They are faster and can serialize ``Decimal`` values.
 
 .. code-block:: python
 
@@ -60,6 +59,9 @@ They are faster and can serialize ``Decimal`` values.
 
     formatter = json_log_formatter.JSONFormatter()
     formatter.json_lib = ujson
+
+Note, **ujson** doesn't support `dumps(default=f)` argument:
+if it can't serialize an attribute, it might fail with `TypeError` or skip an attribute.
 
 Django integration
 ------------------
@@ -111,7 +113,7 @@ To do so you should override ``JSONFormatter.json_record()``.
             return extra
 
 Let's say you want ``datetime`` to be serialized as timestamp.
-Then you should use **ujson** (which does it by default) and disable
+You can use **ujson** (which does it by default) and disable
 ISO8601 date mutation.
 
 .. code-block:: python
