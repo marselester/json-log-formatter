@@ -84,7 +84,10 @@ class JSONFormatter(logging.Formatter):
             return self.json_lib.dumps(record, default=_json_serializable)
         # ujson doesn't support default argument and raises TypeError.
         except TypeError:
-            return self.json_lib.dumps(record)
+            try:
+                return self.json_lib.dumps(record)
+            except TypeError:
+                return '{}'
 
     def extra_from_record(self, record):
         """Returns `extra` dict you passed to logger.
