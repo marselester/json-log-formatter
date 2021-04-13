@@ -204,8 +204,10 @@ class UjsonLibTest(TestCase):
             'request': request
         })
         json_record = json.loads(log_buffer.getvalue())
-        self.assertEqual(json_record['status_code'], 500)
-        self.assertEqual(json_record['request'], [])
+        if 'status_code' in json_record:
+            self.assertEqual(json_record['status_code'], 500)
+        if 'request' in json_record:
+            self.assertEqual(json_record['request'], [])
 
 
 class SimplejsonLibTest(TestCase):
