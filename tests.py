@@ -16,7 +16,7 @@ try:
 except ImportError:
     from io import StringIO
 
-from json_log_formatter import JSONFormatter
+from json_log_formatter import JSONFormatter, VerboseJSONFormatter
 
 log_buffer = StringIO()
 json_handler = logging.StreamHandler(log_buffer)
@@ -266,3 +266,54 @@ class SimplejsonLibTest(TestCase):
         self.assertEqual(json_record['status_code'], 500)
         self.assertEqual(json_record['request']['path'], '/bogus')
         self.assertEqual(json_record['request']['method'], 'BOGUS')
+
+
+class VerboseJSONFormatterTest(TestCase):
+    def setUp(self):
+        json_handler.setFormatter(VerboseJSONFormatter())
+
+    def test_file_name_is_testspy(self):
+        logger.error('An error has occured')
+        json_record = json.loads(log_buffer.getvalue())
+        print(json_record)
+        self.assertEqual(json_record['filename'], 'tests.py')
+
+    def test_function_name(self):
+        logger.error('An error has occured')
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['funcName'], 'test_function_name')
+
+    def test_level_name_is_error(self):
+        logger.error('An error has occured')
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['levelname'], 'ERROR')
+
+    def test_module_name_is_tests(self):
+        logger.error('An error has occured')
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['module'], 'tests')
+
+    def test_logger_name_is_test(self):
+        logger.error('An error has occured')
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['name'], 'test')
+
+    def test_path_name_is_test(self):
+        logger.error('An error has occured')
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertIn('json-log-formatter/tests.py', json_record['pathname'])
+
+    def test_process_name_is_MainProcess(self):
+        logger.error('An error has occured')
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['processName'], 'MainProcess')
+
+    def test_thread_name_is_MainThread(self):
+        logger.error('An error has occured')
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['threadName'], 'MainThread')
+
+    def test_stack_info_is_none(self):
+        logger.error('An error has occured')
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertIsNone(json_record['stack_info'])

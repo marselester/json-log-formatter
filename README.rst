@@ -47,6 +47,35 @@ The log file will contain the following log record (inline).
         "exc_info": "Traceback (most recent call last): ..."
     }
 
+If you use a log collection and analysis system,
+you might need to include the built-in
+`log record attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`_
+with ``VerboseJSONFormatter``.
+
+.. code-block:: python
+
+    json_handler.setFormatter(json_log_formatter.VerboseJSONFormatter())
+    logger.error('An error has occured')
+
+.. code-block:: json
+
+    {
+        "filename": "tests.py",
+        "funcName": "test_file_name_is_testspy",
+        "levelname": "ERROR",
+        "lineno": 276,
+        "module": "tests",
+        "name": "my_json",
+        "pathname": "/Users/bob/json-log-formatter/tests.py",
+        "process": 3081,
+        "processName": "MainProcess",
+        "stack_info": null,
+        "thread": 4664270272,
+        "threadName": "MainThread",
+        "message": "An error has occured",
+        "time": "2021-07-04T21:05:42.767726"
+    }
+
 JSON libraries
 --------------
 
@@ -60,8 +89,8 @@ You can use **ujson** or **simplejson** instead of built-in **json** library.
     formatter = json_log_formatter.JSONFormatter()
     formatter.json_lib = ujson
 
-Note, **ujson** doesn't support `dumps(default=f)` argument:
-if it can't serialize an attribute, it might fail with `TypeError` or skip an attribute.
+Note, **ujson** doesn't support ``dumps(default=f)`` argument:
+if it can't serialize an attribute, it might fail with ``TypeError`` or skip an attribute.
 
 Django integration
 ------------------
@@ -97,7 +126,7 @@ Let's try to log something.
 Custom formatter
 ----------------
 
-You will likely need a custom log format. For instance, you want to log
+You will likely need a custom log formatter. For instance, you want to log
 a user ID, an IP address and ``time`` as ``django.utils.timezone.now()``.
 To do so you should override ``JSONFormatter.json_record()``.
 
@@ -108,17 +137,17 @@ To do so you should override ``JSONFormatter.json_record()``.
             extra['message'] = message
             extra['user_id'] = current_user_id()
             extra['ip'] = current_ip()
-            
+
             # Include builtins
             extra['level'] = record.levelname
             extra['name'] = record.name
-            
+
             if 'time' not in extra:
                 extra['time'] = django.utils.timezone.now()
-            
+
             if record.exc_info:
                 extra['exc_info'] = self.formatException(record.exc_info)
-        
+
             return extra
 
 Let's say you want ``datetime`` to be serialized as timestamp.
