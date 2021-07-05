@@ -141,3 +141,62 @@ def _json_serializable(obj):
         return obj.__dict__
     except AttributeError:
         return str(obj)
+
+
+class VerboseJSONFormatter(JSONFormatter):
+    """JSON log formatter with built-in log record attributes such as log level.
+
+    Usage example::
+
+        import logging
+
+        import json_log_formatter
+
+        json_handler = logging.FileHandler(filename='/var/log/my-log.json')
+        json_handler.setFormatter(json_log_formatter.VerboseJSONFormatter())
+
+        logger = logging.getLogger('my_verbose_json')
+        logger.addHandler(json_handler)
+
+        logger.error('An error has occured')
+
+    The log file will contain the following log record (inline)::
+
+        {
+            "filename": "tests.py",
+            "funcName": "test_file_name_is_testspy",
+            "levelname": "ERROR",
+            "lineno": 276,
+            "module": "tests",
+            "name": "my_verbose_json",
+            "pathname": "/Users/bob/json-log-formatter/tests.py",
+            "process": 3081,
+            "processName": "MainProcess",
+            "stack_info": null,
+            "thread": 4664270272,
+            "threadName": "MainThread",
+            "message": "An error has occured",
+            "time": "2021-07-04T21:05:42.767726"
+        }
+
+    Read more about the built-in log record attributes
+    https://docs.python.org/3/library/logging.html#logrecord-attributes.
+
+    """
+    def json_record(self, message, extra, record):
+        extra['filename'] = record.filename
+        extra['funcName'] = record.funcName
+        extra['levelname'] = record.levelname
+        extra['lineno'] = record.lineno
+        extra['module'] = record.module
+        extra['name'] = record.name
+        extra['pathname'] = record.pathname
+        extra['process'] = record.process
+        extra['processName'] = record.processName
+        if hasattr(record, 'stack_info'):
+            extra['stack_info'] = record.stack_info
+        else:
+            extra['stack_info'] = None
+        extra['thread'] = record.thread
+        extra['threadName'] = record.threadName
+        return super(VerboseJSONFormatter, self).json_record(message, extra, record)
