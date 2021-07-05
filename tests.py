@@ -275,7 +275,6 @@ class VerboseJSONFormatterTest(TestCase):
     def test_file_name_is_testspy(self):
         logger.error('An error has occured')
         json_record = json.loads(log_buffer.getvalue())
-        print(json_record)
         self.assertEqual(json_record['filename'], 'tests.py')
 
     def test_function_name(self):
