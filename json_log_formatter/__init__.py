@@ -76,6 +76,8 @@ class JSONFormatter(logging.Formatter):
         It makes best effort to serialize a record (represents an object as a string)
         instead of raising TypeError if json library supports default argument.
         Note, ujson doesn't support it.
+        ValueError and OverflowError are also caught to avoid crashing an app,
+        e.g., due to circular reference.
 
         Override this method to change the way dict is converted to JSON.
 
@@ -83,10 +85,12 @@ class JSONFormatter(logging.Formatter):
         try:
             return self.json_lib.dumps(record, default=_json_serializable)
         # ujson doesn't support default argument and raises TypeError.
-        except TypeError:
+        # "ValueError: Circular reference detected" is raised
+        # when there is a reference to object inside the object itself.
+        except (TypeError, ValueError):
             try:
                 return self.json_lib.dumps(record)
-            except TypeError:
+            except (TypeError, ValueError, OverflowError):
                 return '{}'
 
     def extra_from_record(self, record):
