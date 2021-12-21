@@ -150,6 +150,12 @@ class JsonLibTest(TestCase):
         self.assertEqual(json_record['request']['path'], '/bogus')
         self.assertEqual(json_record['request']['method'], 'BOGUS')
 
+    def test_json_circular_reference_is_handled(self):
+        d = {}
+        d['circle'] = d
+        logger.info('Referer checking', extra=d)
+        self.assertEqual('{}\n', log_buffer.getvalue())
+
 
 class UjsonLibTest(TestCase):
     def setUp(self):
@@ -209,6 +215,12 @@ class UjsonLibTest(TestCase):
         if 'request' in json_record:
             self.assertEqual(json_record['request'], [])
 
+    def test_json_circular_reference_is_handled(self):
+        d = {}
+        d['circle'] = d
+        logger.info('Referer checking', extra=d)
+        self.assertEqual('{}\n', log_buffer.getvalue())
+
 
 class SimplejsonLibTest(TestCase):
     def setUp(self):
@@ -266,6 +278,12 @@ class SimplejsonLibTest(TestCase):
         self.assertEqual(json_record['status_code'], 500)
         self.assertEqual(json_record['request']['path'], '/bogus')
         self.assertEqual(json_record['request']['method'], 'BOGUS')
+
+    def test_json_circular_reference_is_handled(self):
+        d = {}
+        d['circle'] = d
+        logger.info('Referer checking', extra=d)
+        self.assertEqual('{}\n', log_buffer.getvalue())
 
 
 class VerboseJSONFormatterTest(TestCase):
