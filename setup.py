@@ -1,8 +1,8 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='JSON-log-formatter',
-    version='0.5.0',
+    version='0.5.1',
     license='MIT',
     packages=['json_log_formatter'],
     author='Marsel Mavletkulov',

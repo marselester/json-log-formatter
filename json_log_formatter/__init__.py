@@ -87,7 +87,7 @@ class JSONFormatter(logging.Formatter):
         # ujson doesn't support default argument and raises TypeError.
         # "ValueError: Circular reference detected" is raised
         # when there is a reference to object inside the object itself.
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             try:
                 return self.json_lib.dumps(record)
             except (TypeError, ValueError, OverflowError):
