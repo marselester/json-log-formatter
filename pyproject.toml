@@ -10,7 +10,7 @@ authors = [
     {name = "Marsel Mavletkulov", email = "marselester@ya.ru"},
 ]
 readme = "README.rst"
-version = '0.5.2'
+version = '0.5.1'
 requires-python = ">=3.6"
 license = {text = "MIT"}
 classifiers=[
