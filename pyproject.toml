@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "JSON-log-formatter"
+description = 'JSON log formatter'
+authors = [
+    {name = "Marsel Mavletkulov", email = "marselester@ya.ru"},
+]
+readme = "README.rst"
+version = '0.5.1'
+license = {text = "MIT"}
+classifiers=[
+    'License :: OSI Approved :: MIT License',
+    'Intended Audience :: Developers',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 3',
+    'Topic :: Software Development :: Libraries :: Python Modules'
+]
+
+[tool.setuptools]
+packages = ["json_log_formatter"]
