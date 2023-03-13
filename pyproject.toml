@@ -11,13 +11,13 @@ authors = [
 ]
 readme = "README.rst"
 version = '0.5.1'
-requires-python = ">=3.6"
 license = {text = "MIT"}
 classifiers=[
     'License :: OSI Approved :: MIT License',
     'Intended Audience :: Developers',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 3',
     'Topic :: Software Development :: Libraries :: Python Modules'
 ]
