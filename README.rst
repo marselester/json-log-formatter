@@ -1,9 +1,6 @@
-==================
-JSON log formatter
-==================
-
-.. image:: https://travis-ci.org/marselester/json-log-formatter.png
-   :target: https://travis-ci.org/marselester/json-log-formatter
+====================
+JSON log formatter 🪵
+====================
 
 The library helps you to store logs in JSON format. Why is it important?
 Well, it facilitates integration with **Logstash**.
