@@ -4,6 +4,7 @@ from io import BytesIO
 import unittest
 import logging
 import json
+import os.path
 
 
 from django.core.handlers.wsgi import WSGIRequest
@@ -319,7 +320,7 @@ class VerboseJSONFormatterTest(TestCase):
     def test_path_name_is_test(self):
         logger.error('An error has occured')
         json_record = json.loads(log_buffer.getvalue())
-        self.assertIn('json-log-formatter/tests.py', json_record['pathname'])
+        self.assertIn(os.path.basename(os.path.abspath('.')) + '/tests.py', json_record['pathname'])
 
     def test_process_name_is_MainProcess(self):
         logger.error('An error has occured')
