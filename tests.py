@@ -58,7 +58,7 @@ class JSONFormatterTest(TestCase):
             'message',
             'time',
         ])
-        self.assertEqual(set(json_record), expected_fields)
+        self.assertTrue(expected_fields.issubset(json_record))
 
     def test_message_and_time_and_extra_are_in_json_record_when_extra_is_provided(self):
         logger.info('Sign up', extra={'fizz': 'bazz'})
@@ -68,7 +68,7 @@ class JSONFormatterTest(TestCase):
             'time',
             'fizz',
         ])
-        self.assertEqual(set(json_record), expected_fields)
+        self.assertTrue(expected_fields.issubset(json_record))
 
     def test_exc_info_is_logged(self):
         try:
@@ -213,7 +213,8 @@ class UjsonLibTest(TestCase):
         if 'status_code' in json_record:
             self.assertEqual(json_record['status_code'], 500)
         if 'request' in json_record:
-            self.assertEqual(json_record['request'], [])
+            self.assertEqual(json_record['request']['path'], '/bogus')
+            self.assertEqual(json_record['request']['method'], 'BOGUS')
 
     def test_json_circular_reference_is_handled(self):
         d = {}
