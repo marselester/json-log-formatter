@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 import json
 
@@ -120,7 +120,7 @@ class JSONFormatter(logging.Formatter):
         """
         extra['message'] = message
         if 'time' not in extra:
-            extra['time'] = datetime.utcnow()
+            extra['time'] = datetime.now(timezone.utc)
 
         if record.exc_info:
             extra['exc_info'] = self.formatException(record.exc_info)

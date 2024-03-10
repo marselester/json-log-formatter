@@ -2,11 +2,10 @@ from setuptools import setup
 
 setup(
     name='JSON-log-formatter',
-    version='0.5.2',
+    version='1.0',
     license='MIT',
     packages=['json_log_formatter'],
     author='Marsel Mavletkulov',
-    author_email='marselester@ya.ru',
     url='https://github.com/marselester/json-log-formatter',
     description='JSON log formatter',
     long_description=open('README.rst').read(),
@@ -15,7 +14,6 @@ setup(
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],

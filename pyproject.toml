@@ -7,20 +7,19 @@ packages = ["json_log_formatter"]
 
 [project]
 name = "JSON-log-formatter"
-version = "0.5.2"
+version = "1.0"
 description = "JSON log formatter"
 readme = "README.rst"
-requires-python = ">=2.7"
+requires-python = ">=3.6"
 license = {text = "MIT"}
 authors = [
-    {name = "Marsel Mavletkulov", email = "marselester@ya.ru"},
+    {name = "Marsel Mavletkulov"},
 ]
 classifiers=[
     "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 2",
     "Programming Language :: Python :: 3",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
