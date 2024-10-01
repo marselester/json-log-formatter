@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal
 from datetime import datetime, timezone
 
 import json
@@ -204,3 +205,35 @@ class VerboseJSONFormatter(JSONFormatter):
         extra['thread'] = record.thread
         extra['threadName'] = record.threadName
         return super(VerboseJSONFormatter, self).json_record(message, extra, record)
+
+
+class FlatJSONFormatter(JSONFormatter):
+    """Flat JSON log formatter ensures that complex objects are stored as strings.
+
+    Usage example::
+
+        logger.info('Sign up', extra={'request': WSGIRequest({
+            'PATH_INFO': 'bogus',
+            'REQUEST_METHOD': 'bogus',
+            'CONTENT_TYPE': 'text/html; charset=utf8',
+            'wsgi.input': BytesIO(b''),
+        })})
+
+    The log file will contain the following log record (inline)::
+
+        {
+            "message": "Sign up",
+            "time": "2024-10-01T00:59:29.332888+00:00",
+            "request": "<WSGIRequest: BOGUS '/bogus'>"
+        }
+
+    """
+
+    keep = (bool, int, float, Decimal, complex, str, datetime)
+
+    def json_record(self, message, extra, record):
+        extra = super(FlatJSONFormatter, self).json_record(message, extra, record)
+        return {
+            k: v if v is None or isinstance(v, self.keep) else str(v)
+            for k, v in extra.items()
+        }
