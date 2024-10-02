@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='JSON-log-formatter',
-    version='1.0',
+    version='1.1',
     license='MIT',
     packages=['json_log_formatter'],
     author='Marsel Mavletkulov',
