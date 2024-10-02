@@ -73,6 +73,28 @@ with ``VerboseJSONFormatter``.
         "time": "2021-07-04T21:05:42.767726"
     }
 
+If you need to flatten complex objects as strings, use ``FlatJSONFormatter``.
+
+.. code-block:: python
+
+    json_handler.setFormatter(json_log_formatter.FlatJSONFormatter())
+    logger.error('An error has occured')
+
+    logger.info('Sign up', extra={'request': WSGIRequest({
+        'PATH_INFO': 'bogus',
+        'REQUEST_METHOD': 'bogus',
+        'CONTENT_TYPE': 'text/html; charset=utf8',
+        'wsgi.input': BytesIO(b''),
+    })})
+
+.. code-block:: json
+
+    {
+        "message": "Sign up",
+        "time": "2024-10-01T00:59:29.332888+00:00",
+        "request": "<WSGIRequest: BOGUS '/bogus'>"
+    }
+
 JSON libraries
 --------------
 
