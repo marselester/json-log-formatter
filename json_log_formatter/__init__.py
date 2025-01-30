@@ -1,33 +1,37 @@
+from __future__ import annotations  # backward compatibility
+
 import logging
-from decimal import Decimal
 from datetime import datetime, timezone
-
+from decimal import Decimal
 import json
+from types import ModuleType
+from typing import Any, Optional, Dict
 
-BUILTIN_ATTRS = {
-    'args',
-    'asctime',
-    'created',
-    'exc_info',
-    'exc_text',
-    'filename',
-    'funcName',
-    'levelname',
-    'levelno',
-    'lineno',
-    'module',
-    'msecs',
-    'message',
-    'msg',
-    'name',
-    'pathname',
-    'process',
-    'processName',
-    'relativeCreated',
-    'stack_info',
-    'taskName',
-    'thread',
-    'threadName',
+
+BUILTIN_ATTRS: set[str] = {
+    "args",
+    "asctime",
+    "created",
+    "exc_info",
+    "exc_text",
+    "filename",
+    "funcName",
+    "levelname",
+    "levelno",
+    "lineno",
+    "module",
+    "msecs",
+    "message",
+    "msg",
+    "name",
+    "pathname",
+    "process",
+    "processName",
+    "relativeCreated",
+    "stack_info",
+    "taskName",
+    "thread",
+    "threadName",
 }
 
 
@@ -58,13 +62,13 @@ class JSONFormatter(logging.Formatter):
 
     """
 
-    json_lib = json
+    json_lib: ModuleType = json
 
-    def format(self, record):
-        message = record.getMessage()
-        extra = self.extra_from_record(record)
-        json_record = self.json_record(message, extra, record)
-        mutated_record = self.mutate_json_record(json_record)
+    def format(self, record: logging.LogRecord) -> Any | str:
+        message: str = record.getMessage()
+        extra: dict[str, Any] = self.extra_from_record(record)
+        json_record: dict[str, Any] = self.json_record(message, extra, record)
+        mutated_record: Optional[dict[str, Any]] = self.mutate_json_record(json_record)
         # Backwards compatibility: Functions that overwrite this but don't
         # return a new value will return None because they modified the
         # argument passed in.
@@ -72,7 +76,7 @@ class JSONFormatter(logging.Formatter):
             mutated_record = json_record
         return self.to_json(mutated_record)
 
-    def to_json(self, record):
+    def to_json(self, record: dict[str, Any]) -> Any | str:
         """Converts record dict to a JSON string.
 
         It makes best effort to serialize a record (represents an object as a string)
@@ -93,9 +97,9 @@ class JSONFormatter(logging.Formatter):
             try:
                 return self.json_lib.dumps(record)
             except (TypeError, ValueError, OverflowError):
-                return '{}'
+                return "{}"
 
-    def extra_from_record(self, record):
+    def extra_from_record(self, record: logging.LogRecord) -> dict[str, Any]:
         """Returns `extra` dict you passed to logger.
 
         The `extra` keyword argument is used to populate the `__dict__` of
@@ -108,7 +112,9 @@ class JSONFormatter(logging.Formatter):
             if attr_name not in BUILTIN_ATTRS
         }
 
-    def json_record(self, message, extra, record):
+    def json_record(
+        self, message: str, extra: dict[str, Any], record: logging.LogRecord
+    ) -> dict[str, Any]:
         """Prepares a JSON payload which will be logged.
 
         Override this method to change JSON log format.
@@ -120,16 +126,18 @@ class JSONFormatter(logging.Formatter):
         :return: Dictionary which will be passed to JSON lib.
 
         """
-        extra['message'] = message
-        if 'time' not in extra:
-            extra['time'] = datetime.now(timezone.utc)
+        extra["message"] = message
+        if "time" not in extra:
+            extra["time"] = datetime.now(timezone.utc)
 
         if record.exc_info:
-            extra['exc_info'] = self.formatException(record.exc_info)
+            extra["exc_info"] = self.formatException(record.exc_info)
 
         return extra
 
-    def mutate_json_record(self, json_record):
+    def mutate_json_record(
+        self, json_record: dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         """Override it to convert fields of `json_record` to needed types.
 
         Default implementation converts `datetime` to string in ISO8601 format.
@@ -142,7 +150,7 @@ class JSONFormatter(logging.Formatter):
         return json_record
 
 
-def _json_serializable(obj):
+def _json_serializable(obj: Any) -> Any:
     try:
         return obj.__dict__
     except AttributeError:
@@ -189,23 +197,29 @@ class VerboseJSONFormatter(JSONFormatter):
     https://docs.python.org/3/library/logging.html#logrecord-attributes.
 
     """
-    def json_record(self, message, extra, record):
-        extra['filename'] = record.filename
-        extra['funcName'] = record.funcName
-        extra['levelname'] = record.levelname
-        extra['lineno'] = record.lineno
-        extra['module'] = record.module
-        extra['name'] = record.name
-        extra['pathname'] = record.pathname
-        extra['process'] = record.process
-        extra['processName'] = record.processName
-        if hasattr(record, 'stack_info'):
-            extra['stack_info'] = record.stack_info
-        else:
-            extra['stack_info'] = None
-        extra['thread'] = record.thread
-        extra['threadName'] = record.threadName
-        return super(VerboseJSONFormatter, self).json_record(message, extra, record)
+
+    def json_record(
+        self, message: str, extra: dict[str, Any], record: logging.LogRecord
+    ) -> dict[str, Any]:
+        extra.update(
+            {
+                "filename": record.filename,
+                "funcName": record.funcName,
+                "levelname": record.levelname,
+                "lineno": record.lineno,
+                "module": record.module,
+                "name": record.name,
+                "pathname": record.pathname,
+                "process": record.process,
+                "processName": record.processName,
+                "stack_info": record.stack_info
+                if hasattr(record, "stack_info")
+                else None,
+                "thread": record.thread,
+                "threadName": record.threadName,
+            }
+        )
+        return super().json_record(message, extra, record)
 
 
 class FlatJSONFormatter(JSONFormatter):
@@ -230,10 +244,12 @@ class FlatJSONFormatter(JSONFormatter):
 
     """
 
-    keep = (bool, int, float, Decimal, complex, str, datetime)
+    keep: tuple[type, ...] = (bool, int, float, Decimal, complex, str, datetime)
 
-    def json_record(self, message, extra, record):
-        extra = super(FlatJSONFormatter, self).json_record(message, extra, record)
+    def json_record(
+        self, message: str, extra: dict[str, Any], record: logging.LogRecord
+    ) -> dict[str, Any]:
+        extra = super().json_record(message, extra, record)
         return {
             k: v if v is None or isinstance(v, self.keep) else str(v)
             for k, v in extra.items()

@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup   # type: ignore
 
 setup(
     name='JSON-log-formatter',
