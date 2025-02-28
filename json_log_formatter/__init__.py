@@ -1,11 +1,10 @@
-from __future__ import annotations  # backward compatibility
+from typing import Any
 
 import logging
 from datetime import datetime, timezone
 from decimal import Decimal
 import json
 from types import ModuleType
-from typing import Any, Optional, Dict
 
 
 BUILTIN_ATTRS: set[str] = {
@@ -68,7 +67,7 @@ class JSONFormatter(logging.Formatter):
         message: str = record.getMessage()
         extra: dict[str, Any] = self.extra_from_record(record)
         json_record: dict[str, Any] = self.json_record(message, extra, record)
-        mutated_record: Optional[dict[str, Any]] = self.mutate_json_record(json_record)
+        mutated_record: dict[str, Any] = self.mutate_json_record(json_record)
         # Backwards compatibility: Functions that overwrite this but don't
         # return a new value will return None because they modified the
         # argument passed in.
@@ -135,9 +134,7 @@ class JSONFormatter(logging.Formatter):
 
         return extra
 
-    def mutate_json_record(
-        self, json_record: dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+    def mutate_json_record(self, json_record: dict[str, Any]) -> dict[str, Any]:
         """Override it to convert fields of `json_record` to needed types.
 
         Default implementation converts `datetime` to string in ISO8601 format.

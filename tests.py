@@ -10,8 +10,8 @@ import os.path
 
 from django.core.handlers.wsgi import WSGIRequest
 from django.conf import settings
-import ujson
-import simplejson
+import ujson  # type: ignore
+import simplejson  # type: ignore
 
 try:
     from cStringIO import StringIO  # type: ignore
