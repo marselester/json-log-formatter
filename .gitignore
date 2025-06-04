@@ -6,3 +6,4 @@ __pycache__
 /.tox
 /.cache
 /JSON_log_formatter.egg-info
+.mypy_cache/

@@ -26,3 +26,6 @@ classifiers=[
 
 [project.urls]
 repository = "https://github.com/marselester/json-log-formatter"
+
+[tool.mypy]
+warn_unused_configs = true
