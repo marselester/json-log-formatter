@@ -107,6 +107,24 @@ class JsonLibTest(TestCase):
     def setUp(self):
         json_handler.setFormatter(JSONFormatter())
 
+    def test_request_with_circular_reference_does_not_drop_record(self):
+        request = WSGIRequest({
+            'PATH_INFO': 'bogus',
+            'REQUEST_METHOD': 'bogus',
+            'CONTENT_TYPE': 'text/html; charset=utf8',
+            'wsgi.input': BytesIO(b''),
+        })
+        request.upload_handlers
+
+        logger.log(level=logging.ERROR, msg='Django response error', extra={
+            'status_code': 500,
+            'request': request,
+        })
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['message'], 'Django response error')
+        self.assertEqual(json_record['status_code'], 500)
+        self.assertEqual(json_record['request'], "<WSGIRequest: BOGUS '/bogus'>")
+
     def test_builtin_types_are_serialized(self):
         logger.log(level=logging.ERROR, msg='Payment was sent', extra={
             'first_name': 'bob',
@@ -155,7 +173,9 @@ class JsonLibTest(TestCase):
         d = {}
         d['circle'] = d
         logger.info('Referer checking', extra=d)
-        self.assertEqual('{}\n', log_buffer.getvalue())
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['message'], 'Referer checking')
+        self.assertEqual(json_record['circle'], str(d))
 
 
 class UjsonLibTest(TestCase):
@@ -221,7 +241,9 @@ class UjsonLibTest(TestCase):
         d = {}
         d['circle'] = d
         logger.info('Referer checking', extra=d)
-        self.assertEqual('{}\n', log_buffer.getvalue())
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['message'], 'Referer checking')
+        self.assertEqual(json_record['circle'], str(d))
 
 
 class SimplejsonLibTest(TestCase):
@@ -285,7 +307,9 @@ class SimplejsonLibTest(TestCase):
         d = {}
         d['circle'] = d
         logger.info('Referer checking', extra=d)
-        self.assertEqual('{}\n', log_buffer.getvalue())
+        json_record = json.loads(log_buffer.getvalue())
+        self.assertEqual(json_record['message'], 'Referer checking')
+        self.assertEqual(json_record['circle'], str(d))
 
 
 class VerboseJSONFormatterTest(TestCase):
