@@ -35,12 +35,12 @@ The log file will contain the following log record (inline).
 
     {
         "message": "Sign up",
-        "time": "2015-09-01T06:06:26.524448",
+        "time": "2015-09-01T06:06:26.524448+00:00",
         "referral_code": "52d6ce"
     }
     {
         "message": "Request failed",
-        "time": "2015-09-01T06:06:26.524449",
+        "time": "2015-09-01T06:06:26.524449+00:00",
         "exc_info": "Traceback (most recent call last): ..."
     }
 
@@ -70,7 +70,7 @@ with ``VerboseJSONFormatter``.
         "thread": 4664270272,
         "threadName": "MainThread",
         "message": "An error has occured",
-        "time": "2021-07-04T21:05:42.767726"
+        "time": "2021-07-04T21:05:42.767726+00:00"
     }
 
 If you need to flatten complex objects as strings, use ``FlatJSONFormatter``.
@@ -107,9 +107,6 @@ You can use **ujson** or **simplejson** instead of built-in **json** library.
 
     formatter = json_log_formatter.JSONFormatter()
     formatter.json_lib = ujson
-
-Note, **ujson** doesn't support ``dumps(default=f)`` argument:
-if it can't serialize an attribute, it might fail with ``TypeError`` or skip an attribute.
 
 Django integration
 ------------------
@@ -169,16 +166,17 @@ To do so you should override ``JSONFormatter.json_record()``.
 
             return extra
 
-Let's say you want ``datetime`` to be serialized as timestamp.
-You can use **ujson** (which does it by default) and disable
-ISO8601 date mutation.
+Let's say you want ``datetime`` to be serialized as a timestamp.
+Override ``mutate_json_record`` to convert it.
 
 .. code-block:: python
 
     class CustomisedJSONFormatter(json_log_formatter.JSONFormatter):
-        json_lib = ujson
-
         def mutate_json_record(self, json_record):
+            for attr_name, attr in json_record.items():
+                if isinstance(attr, datetime):
+                    json_record[attr_name] = attr.timestamp()
+
             return json_record
 
 Tests

@@ -76,24 +76,42 @@ class JSONFormatter(logging.Formatter):
         """Converts record dict to a JSON string.
 
         It makes best effort to serialize a record (represents an object as a string)
-        instead of raising TypeError if json library supports default argument.
-        Note, ujson doesn't support it.
-        ValueError and OverflowError are also caught to avoid crashing an app,
-        e.g., due to circular reference.
+        instead of raising TypeError. ValueError and OverflowError are also
+        caught to avoid crashing an app, e.g., due to circular reference.
 
         Override this method to change the way dict is converted to JSON.
 
         """
         try:
             return self.json_lib.dumps(record, default=_json_serializable)
-        # ujson doesn't support default argument and raises TypeError.
-        # "ValueError: Circular reference detected" is raised
-        # when there is a reference to object inside the object itself.
         except (TypeError, ValueError, OverflowError):
-            try:
-                return self.json_lib.dumps(record)
-            except (TypeError, ValueError, OverflowError):
-                return '{}'
+            pass
+
+        # A single value can't be serialized, e.g., a Django request holding
+        # a circular reference via its file upload handlers.
+        # Stringify the offending values so the rest of the record is preserved.
+        if not isinstance(record, dict):
+            return '{}'
+
+        safe_record = {
+            k: self._safe_value(v)
+            for k, v in record.items()
+        }
+        try:
+            return self.json_lib.dumps(safe_record, default=_json_serializable)
+        except (TypeError, ValueError, OverflowError):
+            return '{}'
+
+    def _safe_value(self, value):
+        """Returns the value as is if it's JSON serializable,
+        its string representation otherwise.
+
+        """
+        try:
+            self.json_lib.dumps(value, default=_json_serializable)
+            return value
+        except (TypeError, ValueError, OverflowError):
+            return str(value)
 
     def extra_from_record(self, record):
         """Returns `extra` dict you passed to logger.
