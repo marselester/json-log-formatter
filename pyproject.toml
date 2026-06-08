@@ -7,7 +7,7 @@ packages = ["json_log_formatter"]
 
 [project]
 name = "JSON-log-formatter"
-version = "1.2"
+version = "1.2.1"
 description = "JSON log formatter"
 readme = "README.rst"
 requires-python = ">=3.9"
